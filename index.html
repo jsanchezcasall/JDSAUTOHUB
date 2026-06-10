@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JDS AutoHub</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Inter:wght@300;400;500;600&family=Bebas+Neue&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <style>
 :root{--black:#0a0a0a;--deep:#111;--surface:#1a1a1a;--card:#1f1f1f;--border:#2a2a2a;--gold:#c9a84c;--gold-light:#e8c96b;--gold-dim:#8a6f30;--white:#f5f0e8;--muted:#888;--font-display:'Bebas Neue',sans-serif;--font-serif:'Cormorant Garamond',serif;--font-body:'Inter',sans-serif}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -474,19 +471,6 @@ footer{background:var(--deep);border-top:1px solid var(--border);padding:48px 40
 <div class="toast" id="toast"></div>
 
 <script>
-// ── FIREBASE ──────────────────────────────────
-var firebaseConfig = {
-  apiKey: "AIzaSyAh_7WDCyXgPrJfSlU0-uuZJurqFY20NVo",
-  authDomain: "jdsautohub.firebaseapp.com",
-  projectId: "jdsautohub",
-  storageBucket: "jdsautohub.firebasestorage.app",
-  messagingSenderId: "342417980597",
-  appId: "1:342417980597:web:742ad142adcf6b733e52fc"
-};
-firebase.initializeApp(firebaseConfig);
-var auth = firebase.auth();
-var db = firebase.firestore();
-
 // ── STATE ─────────────────────────────────────
 var currentLang = "es";
 var currentUser = null;
@@ -500,30 +484,7 @@ var marketPrices = {
   moto:{base:4000,perYear:400,perKm:-0.02}
 };
 
-// ── AUTH LISTENER ─────────────────────────────
-auth.onAuthStateChanged(function(user) {
-  if (user) {
-    db.collection("users").doc(user.uid).get().then(function(doc) {
-      if (doc.exists) {
-        currentUser = Object.assign({uid:user.uid,email:user.email}, doc.data());
-      } else {
-        currentUser = {uid:user.uid,email:user.email,name:user.displayName||user.email.split("@")[0],role:"buyer",city:"Colombia"};
-      }
-      document.getElementById("auth-buttons").style.display = "none";
-      document.getElementById("user-menu").style.display = "flex";
-      document.getElementById("user-nav-name").textContent = (currentUser.name||"").split(" ")[0]||"Cuenta";
-      updateProfilePage();
-      updateSellGuard();
-      updateProfileGuard();
-    });
-  } else {
-    currentUser = null;
-    document.getElementById("auth-buttons").style.display = "flex";
-    document.getElementById("user-menu").style.display = "none";
-    updateSellGuard();
-    updateProfileGuard();
-  }
-});
+
 
 // ── INIT ──────────────────────────────────────
 document.addEventListener("DOMContentLoaded", function() {
@@ -562,16 +523,10 @@ function doLogin() {
   var errEl = document.getElementById("login-error");
   errEl.classList.remove("show");
   if (!email || !pass) { errEl.textContent = "Completa todos los campos"; errEl.classList.add("show"); return; }
-  var btn = document.getElementById("btn-login");
-  btn.textContent = "Ingresando..."; btn.disabled = true;
-  auth.signInWithEmailAndPassword(email, pass)
-    .then(function() { closeModal("auth-modal"); showToast("Bienvenido de nuevo!"); })
-    .catch(function(e) {
-      var msg = "Correo o contrasena incorrectos";
-      if (e.code === "auth/invalid-email") msg = "Correo no valido";
-      errEl.textContent = msg; errEl.classList.add("show");
-      btn.textContent = "Ingresar a mi cuenta"; btn.disabled = false;
-    });
+  // Simulated login
+  var name = email.split("@")[0].replace(/[._]/g," ").replace(/\b\w/g,function(c){return c.toUpperCase();});
+  currentUser = {uid:"local-"+Date.now(), email:email, name:name, role:"seller", city:"Colombia"};
+  onLoginSuccess();
 }
 
 // ── REGISTER ──────────────────────────────────
@@ -587,47 +542,38 @@ function doRegister() {
   errEl.classList.remove("show");
   if (!fn || !ln || !em || !pass) { errEl.textContent = "Completa todos los campos"; errEl.classList.add("show"); return; }
   if (pass.length < 8) { errEl.textContent = "La contrasena debe tener al menos 8 caracteres"; errEl.classList.add("show"); return; }
-  var btn = document.getElementById("btn-register");
-  btn.textContent = "Creando cuenta..."; btn.disabled = true;
-  auth.createUserWithEmailAndPassword(em, pass)
-    .then(function(cred) {
-      var data = {name:fn+" "+ln, email:em, role:role, city:city||"Colombia", createdAt:firebase.firestore.FieldValue.serverTimestamp()};
-      return db.collection("users").doc(cred.user.uid).set(data);
-    })
-    .then(function() { closeModal("auth-modal"); showToast("Bienvenido a JDS AutoHub, "+fn+"!"); })
-    .catch(function(e) {
-      var msg = "Error al crear cuenta";
-      if (e.code === "auth/email-already-in-use") msg = "Este correo ya esta registrado";
-      if (e.code === "auth/weak-password") msg = "La contrasena es muy debil";
-      errEl.textContent = msg; errEl.classList.add("show");
-      btn.textContent = "Crear mi cuenta"; btn.disabled = false;
-    });
+  currentUser = {uid:"local-"+Date.now(), email:em, name:fn+" "+ln, role:role, city:city||"Colombia"};
+  onLoginSuccess(fn);
 }
 
 // ── GOOGLE LOGIN ──────────────────────────────
 function doGoogleLogin() {
-  var provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider)
-    .then(function(result) {
-      var user = result.user;
-      db.collection("users").doc(user.uid).get().then(function(doc) {
-        if (!doc.exists) {
-          db.collection("users").doc(user.uid).set({
-            name: user.displayName||user.email.split("@")[0],
-            email: user.email, role:"buyer", city:"Colombia",
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-        }
-      });
-      closeModal("auth-modal");
-      showToast("Bienvenido, "+(user.displayName||user.email)+"!");
-    })
-    .catch(function(e) { showToast("Error al ingresar con Google: "+e.message); });
+  showToast("Login con Google disponible proximamente");
+}
+
+
+// ── ON LOGIN ──────────────────────────────────
+function onLoginSuccess(firstName) {
+  var name = firstName || (currentUser.name||"").split(" ")[0];
+  closeModal("auth-modal");
+  document.getElementById("auth-buttons").style.display = "none";
+  document.getElementById("user-menu").style.display = "flex";
+  document.getElementById("user-nav-name").textContent = name;
+  updateProfilePage();
+  updateSellGuard();
+  updateProfileGuard();
+  showToast("Bienvenido, " + name + "!");
 }
 
 // ── LOGOUT ────────────────────────────────────
 function doLogout() {
-  auth.signOut().then(function() { showToast("Has cerrado sesion"); showPage("home"); });
+  currentUser = null;
+  document.getElementById("auth-buttons").style.display = "flex";
+  document.getElementById("user-menu").style.display = "none";
+  updateSellGuard();
+  updateProfileGuard();
+  showToast("Has cerrado sesion");
+  showPage("home");
 }
 
 // ── GUARDS ────────────────────────────────────
@@ -655,14 +601,11 @@ function updateProfilePage() {
 
 function loadMyListings() {
   if (!currentUser) return;
-  db.collection("listings").where("userId","==",currentUser.uid).orderBy("createdAt","desc").get()
-    .then(function(snap) {
-      var myL = snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
-      document.getElementById("ps-listings").textContent = myL.length;
-      document.getElementById("my-listings-count").textContent = myL.length+" publicaciones";
-      renderGrid("my-listings-grid", myL);
-      document.getElementById("my-listings-empty").style.display = myL.length ? "none" : "block";
-    }).catch(function(e){console.log(e);});
+  var myL = allListings.filter(function(v){return v.userId === currentUser.uid;});
+  document.getElementById("ps-listings").textContent = myL.length;
+  document.getElementById("my-listings-count").textContent = myL.length+" publicaciones";
+  renderGrid("my-listings-grid", myL);
+  document.getElementById("my-listings-empty").style.display = myL.length ? "none" : "block";
 }
 
 function switchProfileTab(tab, el) {
@@ -680,12 +623,9 @@ function saveSettings() {
   var phone = document.getElementById("set-phone").value.trim();
   var r = document.querySelector("input[name='set-role']:checked");
   var role = r ? r.value : currentUser.role;
-  db.collection("users").doc(currentUser.uid).update({name:name,city:city,phone:phone,role:role})
-    .then(function() {
-      currentUser.name=name; currentUser.city=city; currentUser.role=role;
-      document.getElementById("user-nav-name").textContent = name.split(" ")[0];
-      updateProfilePage(); showToast("Perfil actualizado");
-    }).catch(function(){showToast("Error al guardar");});
+  currentUser.name=name; currentUser.city=city; currentUser.role=role;
+  document.getElementById("user-nav-name").textContent = name.split(" ")[0];
+  updateProfilePage(); showToast("Perfil actualizado");
 }
 
 function selectRole(role) {
@@ -704,17 +644,23 @@ function selectRegRole(role) {
 }
 
 // ── LISTINGS ──────────────────────────────────
+var sampleListings = [
+  {id:"1",type:"luxury",brand:"BMW",model:"Serie 5 530i",year:2022,km:18000,trans:"auto",color:"Negro",city:"Bogota",price:45000,desc:"Vehiculo en excelente estado. Un solo dueno, mantenimiento al dia.",sellerName:"Carlos Mejia",photos:["https://images.unsplash.com/photo-1555215695-3004980ad54e?w=500&q=80"]},
+  {id:"2",type:"truck",brand:"Toyota",model:"Hilux 4x4 SR5",year:2023,km:9500,trans:"auto",color:"Blanco",city:"Medellin",price:38000,desc:"Hilux de trabajo y aventura. Ideal para ciudad y campo.",sellerName:"Andres Vargas",photos:["https://images.unsplash.com/photo-1558979158-65a1eaa08691?w=500&q=80"]},
+  {id:"3",type:"car",brand:"Mazda",model:"CX-5 GT AWD",year:2021,km:32000,trans:"auto",color:"Rojo",city:"Cali",price:29500,desc:"CX-5 tope de gama. Unico dueno, no accidentado.",sellerName:"Laura Jimenez",photos:["https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=500&q=80"]},
+  {id:"4",type:"luxury",brand:"Mercedes",model:"Clase C 300 AMG",year:2023,km:5200,trans:"auto",color:"Gris",city:"Bogota",price:62000,desc:"Mercedes Clase C paquete AMG completo. Garantia vigente.",sellerName:"Diego Restrepo",photos:["https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=500&q=80"]},
+  {id:"5",type:"moto",brand:"KTM",model:"Duke 390",year:2022,km:8700,trans:"manual",color:"Naranja",city:"Pereira",price:5800,desc:"KTM Duke 390 en perfecto estado.",sellerName:"Sebastian Mora",photos:["https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=500&q=80"]},
+  {id:"6",type:"car",brand:"Chevrolet",model:"Onix Plus LTZ Turbo",year:2023,km:15000,trans:"auto",color:"Azul",city:"Bucaramanga",price:18500,desc:"Onix Plus turbocargado automatico. Impecable.",sellerName:"Paola Torres",photos:["https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=500&q=80"]}
+];
+
 function loadListings() {
-  db.collection("listings").orderBy("createdAt","desc").limit(50).get()
-    .then(function(snap) {
-      allListings = snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
-      document.getElementById("stat-listings").textContent = allListings.length;
-      renderGrid("featured-grid", allListings.slice(0,3));
-      renderGrid("browse-grid", allListings);
-      updateResultsCount(allListings.length);
-      if (!allListings.length) document.getElementById("featured-grid").innerHTML = "<div style='color:var(--muted);padding:40px'>Se el primero en publicar!</div>";
-    }).catch(function(e){console.log(e);});
-  db.collection("users").get().then(function(snap){document.getElementById("stat-users").textContent=snap.size;}).catch(function(){});
+  allListings = sampleListings.slice();
+  document.getElementById("stat-listings").textContent = allListings.length;
+  document.getElementById("stat-users").textContent = "1,830";
+  document.getElementById("stat-sold").textContent = "93";
+  renderGrid("featured-grid", allListings.slice(0,3));
+  renderGrid("browse-grid", allListings);
+  updateResultsCount(allListings.length);
 }
 
 function renderGrid(gridId, items) {
@@ -777,11 +723,8 @@ function openDetail(id) {
 
 function toggleFav() {
   if (!currentUser) { openAuthModal("login"); return; }
-  var ref = db.collection("users").doc(currentUser.uid).collection("favorites").doc(currentDetailId);
-  ref.get().then(function(doc) {
-    if (doc.exists) { ref.delete().then(function(){document.getElementById("fav-btn").textContent="Guardar";showToast("Eliminado de favoritos");}); }
-    else { ref.set({savedAt:firebase.firestore.FieldValue.serverTimestamp()}).then(function(){document.getElementById("fav-btn").textContent="Guardado";showToast("Agregado a favoritos");}); }
-  });
+  showToast("Guardado en favoritos");
+  document.getElementById("fav-btn").textContent = "Guardado";
 }
 function contactSeller() { closeModal("detail-modal"); showToast("Funcion de contacto disponible proximamente"); }
 
@@ -837,21 +780,15 @@ function submitListing() {
   var btn = document.getElementById("btn-publish");
   btn.textContent = "Publicando..."; btn.disabled = true;
   var photos = myPhotosData.length ? myPhotosData : ["https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=500&q=80"];
-  db.collection("listings").add({
-    type:type,brand:brand,model:model,year:year,km:km,trans:trans,color:color,
-    city:city||currentUser.city||"Colombia",desc:desc,price:price,badge:type,
-    userId:currentUser.uid,sellerName:currentUser.name,
-    createdAt:firebase.firestore.FieldValue.serverTimestamp(),photos:photos
-  }).then(function(ref) {
-    allListings.unshift(Object.assign({id:ref.id},{type:type,brand:brand,model:model,year:year,km:km,trans:trans,color:color,city:city,desc:desc,price:price,badge:type,photos:photos,sellerName:currentUser.name}));
-    ["s-type","s-brand","s-model","s-year","s-km","s-color","s-city","s-desc","s-price"].forEach(function(id){var el=document.getElementById(id);if(el)el.value="";});
-    document.getElementById("photo-previews").innerHTML="";
-    document.getElementById("price-suggestion").classList.remove("show");
-    myPhotosData=[];
-    showToast("Publicacion creada exitosamente!");
-    showPage("profile");
-  }).catch(function(e){showToast("Error al publicar");console.log(e);})
-  .finally(function(){btn.textContent="Publicar vehiculo";btn.disabled=false;});
+  var newListing = {id:"local-"+Date.now(),type:type,brand:brand,model:model,year:year,km:km,trans:trans,color:color,city:city||currentUser.city||"Colombia",desc:desc,price:price,badge:type,userId:currentUser.uid,sellerName:currentUser.name,photos:photos};
+  allListings.unshift(newListing);
+  ["s-type","s-brand","s-model","s-year","s-km","s-color","s-city","s-desc","s-price"].forEach(function(id){var el=document.getElementById(id);if(el)el.value="";});
+  document.getElementById("photo-previews").innerHTML="";
+  document.getElementById("price-suggestion").classList.remove("show");
+  myPhotosData=[];
+  btn.textContent="Publicar vehiculo"; btn.disabled=false;
+  showToast("Publicacion creada exitosamente!");
+  showPage("profile");
 }
 
 // ── LANGUAGE ──────────────────────────────────
