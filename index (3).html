@@ -1,0 +1,1872 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JDS AutoHub — Compra y Vende tu Vehículo</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Inter:wght@300;400;500;600&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --deep: #111111;
+    --surface: #1a1a1a;
+    --card: #1f1f1f;
+    --border: #2a2a2a;
+    --gold: #c9a84c;
+    --gold-light: #e8c96b;
+    --gold-dim: #8a6f30;
+    --white: #f5f0e8;
+    --muted: #888888;
+    --danger: #c0392b;
+    --success: #27ae60;
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-serif: 'Cormorant Garamond', serif;
+    --font-body: 'Inter', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ─── SCROLLBAR ─────────────────────────────── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--deep); }
+  ::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 3px; }
+
+  /* ─── NAV ────────────────────────────────────── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 68px;
+  }
+
+  .nav-logo {
+    font-family: var(--font-display);
+    font-size: 28px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    cursor: pointer;
+  }
+  .nav-logo span { color: var(--white); }
+
+  .nav-links {
+    display: flex; gap: 32px; list-style: none;
+  }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: color .2s;
+    cursor: pointer;
+  }
+  .nav-links a:hover { color: var(--gold); }
+
+  .nav-actions { display: flex; gap: 12px; align-items: center; }
+
+  .btn {
+    padding: 10px 22px;
+    border-radius: 2px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: .8px;
+    cursor: pointer;
+    transition: all .2s;
+    border: none;
+    text-transform: uppercase;
+  }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--white);
+  }
+  .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-gold {
+    background: var(--gold);
+    color: var(--black);
+    font-weight: 600;
+  }
+  .btn-gold:hover { background: var(--gold-light); }
+  .btn-outline-gold {
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+  }
+  .btn-outline-gold:hover { background: var(--gold); color: var(--black); }
+
+  /* ─── PAGES ──────────────────────────────────── */
+  .page { display: none; min-height: 100vh; padding-top: 68px; }
+  .page.active { display: block; }
+
+  /* ─── HERO ───────────────────────────────────── */
+  #page-home .hero {
+    position: relative;
+    height: calc(100vh - 68px);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    background: var(--deep);
+  }
+
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 40%, rgba(201,168,76,0.07) 0%, transparent 70%),
+      linear-gradient(180deg, var(--deep) 0%, var(--black) 100%);
+  }
+
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  .hero-content {
+    position: relative; z-index: 2;
+    text-align: center;
+    max-width: 860px;
+    padding: 0 24px;
+  }
+
+  .hero-eyebrow {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+    font-weight: 500;
+  }
+
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(64px, 10vw, 130px);
+    line-height: .95;
+    letter-spacing: 4px;
+    color: var(--white);
+    margin-bottom: 8px;
+  }
+  .hero-title .accent { color: var(--gold); }
+
+  .hero-sub {
+    font-family: var(--font-serif);
+    font-size: clamp(18px, 2.5vw, 26px);
+    font-weight: 300;
+    color: var(--muted);
+    letter-spacing: 2px;
+    margin-bottom: 44px;
+    font-style: italic;
+  }
+
+  .hero-trust {
+    display: flex; align-items: center; justify-content: center;
+    gap: 14px; flex-wrap: wrap;
+    margin-bottom: 36px;
+  }
+  .trust-item {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    color: var(--gold-light);
+  }
+  .trust-dot {
+    color: var(--gold-dim);
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .hero-cta { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+  .hero-stats {
+    position: absolute; bottom: 40px; left: 0; right: 0;
+    display: flex; justify-content: center; gap: 60px;
+  }
+  .stat-item { text-align: center; }
+  .stat-num {
+    font-family: var(--font-display);
+    font-size: 36px;
+    letter-spacing: 2px;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* ─── SECTION STYLES ─────────────────────────── */
+  .section { padding: 80px 40px; max-width: 1200px; margin: 0 auto; }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 48px;
+    letter-spacing: 3px;
+    color: var(--white);
+    margin-bottom: 8px;
+  }
+  .section-title .gold { color: var(--gold); }
+  .section-eyebrow {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+  .section-line {
+    width: 60px; height: 2px;
+    background: var(--gold);
+    margin-bottom: 40px;
+  }
+
+  /* ─── FILTERS ────────────────────────────────── */
+  .filters-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px 28px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 36px;
+  }
+
+  .filter-group label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  .filter-group select,
+  .filter-group input {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--white);
+    padding: 10px 12px;
+    border-radius: 2px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .filter-group select:hover,
+  .filter-group input:hover,
+  .filter-group select:focus,
+  .filter-group input:focus { border-color: var(--gold); }
+
+  .filter-group select option { background: var(--card); }
+
+  /* ─── VEHICLE CARDS ──────────────────────────── */
+  .vehicles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+  }
+
+  .vehicle-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform .2s, border-color .2s, box-shadow .2s;
+  }
+  .vehicle-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--gold-dim);
+    box-shadow: 0 12px 40px rgba(201,168,76,0.1);
+  }
+
+  .card-img-wrap {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .card-img-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform .4s;
+  }
+  .vehicle-card:hover .card-img-wrap img { transform: scale(1.04); }
+
+  .card-badge {
+    position: absolute; top: 12px; left: 12px;
+    background: var(--gold);
+    color: var(--black);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 2px;
+  }
+  .card-badge.luxury { background: var(--white); color: var(--black); }
+  .card-badge.moto { background: #1a6fff; color: var(--white); }
+
+  .card-body { padding: 20px; }
+  .card-brand {
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .card-name {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+  .card-details {
+    display: flex; gap: 16px;
+    font-size: 12px; color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .card-detail { display: flex; align-items: center; gap: 5px; }
+
+  .card-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+    margin-top: 4px;
+  }
+  .card-price {
+    font-family: var(--font-display);
+    font-size: 26px;
+    letter-spacing: 1px;
+    color: var(--gold);
+  }
+  .card-price-sub {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* ─── MODAL ──────────────────────────────────── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 2000;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(6px);
+    align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    width: 100%; max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalIn .25s ease;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(20px) scale(.97); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .modal-header {
+    padding: 28px 32px 0;
+    display: flex; justify-content: space-between; align-items: flex-start;
+  }
+  .modal-title {
+    font-family: var(--font-display);
+    font-size: 32px;
+    letter-spacing: 2px;
+    color: var(--white);
+  }
+  .modal-title span { color: var(--gold); }
+  .modal-close {
+    background: none; border: none; color: var(--muted);
+    font-size: 24px; cursor: pointer; line-height: 1;
+    transition: color .15s;
+  }
+  .modal-close:hover { color: var(--white); }
+
+  .modal-body { padding: 24px 32px 32px; }
+
+  .modal-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 28px;
+  }
+  .modal-tab {
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all .2s;
+    background: none; border-top: none; border-left: none; border-right: none;
+  }
+  .modal-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+  .modal-tab:hover:not(.active) { color: var(--white); }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ─── FORMS ──────────────────────────────────── */
+  .form-group { margin-bottom: 18px; }
+  .form-group label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--white);
+    padding: 12px 14px;
+    border-radius: 2px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    outline: none;
+    transition: border-color .2s;
+    resize: none;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus { border-color: var(--gold); }
+  .form-group input::placeholder,
+  .form-group textarea::placeholder { color: #555; }
+  .form-group select option { background: var(--card); }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+  .form-divider {
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    margin: 20px 0;
+    position: relative;
+  }
+  .form-divider::before, .form-divider::after {
+    content: '';
+    position: absolute; top: 50%;
+    width: 42%; height: 1px;
+    background: var(--border);
+  }
+  .form-divider::before { left: 0; }
+  .form-divider::after { right: 0; }
+
+  .role-selector {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; margin-bottom: 8px;
+  }
+  .role-option {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px;
+    cursor: pointer;
+    text-align: center;
+    transition: all .2s;
+    background: var(--card);
+  }
+  .role-option:hover { border-color: var(--gold-dim); }
+  .role-option.selected { border-color: var(--gold); background: rgba(201,168,76,0.06); }
+  .role-option input[type=radio] { display: none; }
+  .role-icon { font-size: 28px; margin-bottom: 6px; display: block; }
+  .role-label { font-size: 13px; font-weight: 600; color: var(--white); }
+  .role-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* ─── UPLOAD AREA ────────────────────────────── */
+  .upload-area {
+    border: 2px dashed var(--border);
+    border-radius: 4px;
+    padding: 32px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .2s;
+    background: var(--card);
+  }
+  .upload-area:hover { border-color: var(--gold-dim); background: rgba(201,168,76,0.03); }
+  .upload-icon { font-size: 36px; margin-bottom: 10px; display: block; }
+  .upload-label { font-size: 14px; color: var(--white); font-weight: 500; margin-bottom: 4px; }
+  .upload-hint { font-size: 12px; color: var(--muted); }
+  .upload-area input[type=file] { display: none; }
+
+  .photo-previews {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    margin-top: 14px;
+  }
+  .photo-thumb {
+    width: 72px; height: 72px;
+    border-radius: 3px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    position: relative;
+    cursor: pointer;
+    transition: border-color .2s;
+  }
+  .photo-thumb:hover { border-color: var(--gold); }
+
+  /* ─── PRICE SUGGESTION ───────────────────────── */
+  .price-suggestion {
+    background: rgba(201,168,76,0.06);
+    border: 1px solid var(--gold-dim);
+    border-radius: 4px;
+    padding: 18px 20px;
+    margin: 16px 0;
+    display: none;
+  }
+  .price-suggestion.show { display: block; }
+  .price-sug-label { font-size: 11px; letter-spacing: 1.5px; color: var(--gold); text-transform: uppercase; margin-bottom: 4px; }
+  .price-sug-value { font-family: var(--font-display); font-size: 34px; letter-spacing: 1px; color: var(--white); }
+  .price-sug-range { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  /* ─── PROFILE PAGE ───────────────────────────── */
+  .profile-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 40px;
+    display: flex; gap: 32px; align-items: center;
+  }
+  .profile-avatar-wrap { position: relative; }
+  .profile-avatar {
+    width: 96px; height: 96px;
+    border-radius: 50%;
+    background: var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display);
+    font-size: 40px;
+    color: var(--black);
+    border: 3px solid var(--gold-dim);
+    overflow: hidden;
+  }
+  .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .profile-info { flex: 1; }
+  .profile-name {
+    font-family: var(--font-serif);
+    font-size: 34px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .profile-role {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(201,168,76,0.1);
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 4px 12px; border-radius: 2px; margin-bottom: 8px; font-weight: 500;
+  }
+  .profile-meta { font-size: 13px; color: var(--muted); }
+
+  .profile-stats {
+    display: flex; gap: 32px;
+    padding: 24px 40px;
+    border-bottom: 1px solid var(--border);
+    background: var(--deep);
+  }
+  .profile-stat { text-align: center; }
+  .profile-stat-num { font-family: var(--font-display); font-size: 30px; color: var(--gold); }
+  .profile-stat-label { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+
+  .profile-tabs {
+    display: flex; gap: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    background: var(--deep);
+  }
+  .profile-tab {
+    padding: 14px 24px;
+    font-size: 13px; font-weight: 500; letter-spacing: .8px; text-transform: uppercase;
+    color: var(--muted); cursor: pointer;
+    border-bottom: 2px solid transparent; transition: all .2s;
+    background: none; border-top: none; border-left: none; border-right: none;
+  }
+  .profile-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+  .profile-tab:hover:not(.active) { color: var(--white); }
+
+  /* ─── SELL PAGE ──────────────────────────────── */
+  .sell-layout {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 32px;
+    align-items: start;
+  }
+  .sell-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 32px;
+  }
+  .sell-card-title {
+    font-family: var(--font-display);
+    font-size: 24px;
+    letter-spacing: 2px;
+    color: var(--white);
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tips-card {
+    background: rgba(201,168,76,0.04);
+    border: 1px solid var(--gold-dim);
+    border-radius: 4px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .tips-title {
+    font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--gold); font-weight: 600; margin-bottom: 14px;
+  }
+  .tip-item {
+    display: flex; gap: 10px;
+    font-size: 13px; color: var(--muted); margin-bottom: 10px;
+  }
+  .tip-icon { color: var(--gold); flex-shrink: 0; font-size: 14px; }
+
+  /* ─── VEHICLE DETAIL MODAL ───────────────────── */
+  .detail-modal { max-width: 780px; }
+  .detail-imgs {
+    display: flex; gap: 8px;
+    overflow-x: auto;
+    margin-bottom: 24px;
+    padding-bottom: 6px;
+  }
+  .detail-img {
+    flex-shrink: 0;
+    width: 240px; height: 160px;
+    object-fit: cover;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: border-color .2s;
+  }
+  .detail-img.main { width: 100%; height: 280px; flex-shrink: 0; }
+  .detail-img:hover { border-color: var(--gold); }
+
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 24px; margin: 20px 0; }
+  .detail-field label { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 3px; }
+  .detail-field span { font-size: 14px; color: var(--white); }
+
+  .seller-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 18px;
+    display: flex; gap: 14px; align-items: center;
+    margin-top: 20px;
+  }
+  .seller-av {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    color: var(--black);
+    flex-shrink: 0;
+    font-family: var(--font-display);
+  }
+  .seller-name { font-weight: 600; margin-bottom: 2px; }
+  .seller-meta { font-size: 12px; color: var(--muted); }
+
+  /* ─── TOAST ──────────────────────────────────── */
+  .toast {
+    position: fixed; bottom: 32px; right: 32px; z-index: 9999;
+    background: var(--surface);
+    border: 1px solid var(--gold-dim);
+    border-left: 3px solid var(--gold);
+    padding: 14px 20px;
+    border-radius: 3px;
+    font-size: 14px; color: var(--white);
+    box-shadow: 0 8px 32px rgba(0,0,0,.4);
+    display: none;
+    animation: toastIn .3s ease;
+    max-width: 320px;
+  }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* ─── FOOTER ─────────────────────────────────── */
+  footer {
+    background: var(--deep);
+    border-top: 1px solid var(--border);
+    padding: 48px 40px 32px;
+  }
+  .footer-grid {
+    max-width: 1200px; margin: 0 auto;
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px;
+    margin-bottom: 40px;
+  }
+  .footer-brand .nav-logo { font-size: 32px; display: block; margin-bottom: 12px; }
+  .footer-desc { font-size: 13px; color: var(--muted); line-height: 1.7; max-width: 260px; }
+  .footer-col h4 { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); font-weight: 600; margin-bottom: 16px; }
+  .footer-col ul { list-style: none; }
+  .footer-col li { margin-bottom: 8px; }
+  .footer-col a { color: var(--muted); text-decoration: none; font-size: 13px; transition: color .15s; cursor: pointer; }
+  .footer-col a:hover { color: var(--white); }
+  .footer-bottom {
+    max-width: 1200px; margin: 0 auto;
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px; color: var(--muted);
+  }
+
+  /* ─── EMPTY STATE ────────────────────────────── */
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--muted);
+  }
+  .empty-icon { font-size: 56px; margin-bottom: 16px; opacity: .4; }
+  .empty-title { font-family: var(--font-serif); font-size: 24px; color: var(--white); margin-bottom: 8px; }
+  .empty-text { font-size: 14px; }
+
+  /* ─── RESPONSIVE ─────────────────────────────── */
+  @media (max-width: 768px) {
+    nav { padding: 0 20px; }
+    .nav-links { display: none; }
+    .section { padding: 48px 20px; }
+    .sell-layout { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .hero-stats { gap: 24px; flex-wrap: wrap; padding: 0 20px; bottom: 20px; }
+    .profile-header { flex-direction: column; text-align: center; padding: 32px 20px; }
+    .profile-tabs { padding: 0 20px; overflow-x: auto; }
+    .modal { max-width: 100%; }
+  }
+
+  /* ─── LANG TOGGLE ────────────────────────────── */
+  .lang-toggle {
+    background: none; border: 1px solid var(--border);
+    color: var(--muted); padding: 6px 12px;
+    border-radius: 2px; font-size: 12px; letter-spacing: 1px;
+    cursor: pointer; transition: all .2s; font-family: var(--font-body);
+    font-weight: 500;
+  }
+  .lang-toggle:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ─── SEARCH BAR ─────────────────────────────── */
+  .search-bar-wrap {
+    position: relative; max-width: 540px; margin: 0 auto 0;
+  }
+  .search-bar {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--white);
+    padding: 14px 18px 14px 46px;
+    border-radius: 2px;
+    font-family: var(--font-body);
+    font-size: 14px; outline: none; transition: border-color .2s;
+  }
+  .search-bar:focus { border-color: var(--gold); }
+  .search-icon {
+    position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+    color: var(--muted); font-size: 16px;
+  }
+
+  /* ─── HOW IT WORKS ───────────────────────────── */
+  .how-steps {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1px; background: var(--border);
+    border: 1px solid var(--border); border-radius: 4px;
+    overflow: hidden;
+  }
+  .how-step {
+    background: var(--card);
+    padding: 32px 28px;
+  }
+  .how-num {
+    font-family: var(--font-display);
+    font-size: 56px; letter-spacing: 2px;
+    color: rgba(201,168,76,0.15);
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+  .how-title {
+    font-family: var(--font-serif);
+    font-size: 20px; font-weight: 600;
+    color: var(--white); margin-bottom: 8px;
+  }
+  .how-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* No-login guard */
+  .guard-msg {
+    text-align: center; padding: 120px 20px;
+  }
+  .guard-icon { font-size: 60px; margin-bottom: 20px; opacity: .3; }
+  .guard-title {
+    font-family: var(--font-serif); font-size: 28px; font-weight: 600;
+    color: var(--white); margin-bottom: 10px;
+  }
+  .guard-text { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ NAV ═══════════ -->
+<nav>
+  <div class="nav-logo" onclick="showPage('home')">JDS <span>AUTO</span>HUB</div>
+  <ul class="nav-links">
+    <li><a onclick="showPage('home')" data-es="Inicio" data-en="Home">Inicio</a></li>
+    <li><a onclick="showPage('browse')" data-es="Explorar" data-en="Browse">Explorar</a></li>
+    <li><a onclick="showPage('sell')" data-es="Vender" data-en="Sell">Vender</a></li>
+    <li><a onclick="showPage('profile')" data-es="Mi Perfil" data-en="My Profile">Mi Perfil</a></li>
+  </ul>
+  <div class="nav-actions">
+    <button class="lang-toggle" onclick="toggleLang()" id="langBtn">EN</button>
+    <div id="auth-buttons">
+      <button class="btn btn-ghost" onclick="openAuthModal('login')" data-es="Ingresar" data-en="Sign In">Ingresar</button>
+      <button class="btn btn-gold" onclick="openAuthModal('register')" data-es="Registrarse" data-en="Register">Registrarse</button>
+    </div>
+    <div id="user-menu" style="display:none;">
+      <button class="btn btn-outline-gold" onclick="showPage('profile')" id="user-nav-name">Mi Cuenta</button>
+      <button class="btn btn-ghost" onclick="logout()" style="margin-left:8px" data-es="Salir" data-en="Log Out">Salir</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════ PAGE: HOME ═══════════ -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-content">
+      <p class="hero-eyebrow" data-es="Compra. Vende. Sin vueltas." data-en="Buy. Sell. No hassle.">Compra. Vende. Sin vueltas.</p>
+      <h1 class="hero-title">JDS <span class="accent">AUTO</span>HUB</h1>
+      <p class="hero-sub" data-es="Compra, vende o cambia — para todos los bolsillos" data-en="Buy, sell or trade — for every budget">Compra, vende o cambia — para todos los bolsillos</p>
+      <div class="hero-trust">
+        <span class="trust-item" data-es="✓ Vendedores verificados" data-en="✓ Verified sellers">✓ Vendedores verificados</span>
+        <span class="trust-dot">·</span>
+        <span class="trust-item" data-es="✓ Precios reales" data-en="✓ Real prices">✓ Precios reales</span>
+        <span class="trust-dot">·</span>
+        <span class="trust-item" data-es="✓ Tratos transparentes" data-en="✓ Transparent deals">✓ Tratos transparentes</span>
+      </div>
+      <div class="hero-cta">
+        <button class="btn btn-gold" onclick="showPage('browse')" data-es="Ver vehículos disponibles" data-en="See available vehicles">Ver vehículos disponibles</button>
+        <button class="btn btn-ghost" onclick="openAuthModal('register')" data-es="Publicar gratis" data-en="List for free">Publicar gratis</button>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-num" id="stat-listings">247</div>
+        <div class="stat-label" data-es="Vehículos activos" data-en="Active listings">Vehículos activos</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" id="stat-users">1,830</div>
+        <div class="stat-label" data-es="Usuarios registrados" data-en="Registered users">Usuarios registrados</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" id="stat-sold">93</div>
+        <div class="stat-label" data-es="Vendidos este mes" data-en="Sold this month">Vendidos este mes</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- How it works -->
+  <div class="section">
+    <p class="section-eyebrow" data-es="Cómo funciona" data-en="How it works">Cómo funciona</p>
+    <h2 class="section-title" data-es="Simple. Rápido. <span class='gold'>Seguro.</span>" data-en="Simple. Fast. <span class='gold'>Secure.</span>">Simple. Rápido. <span class="gold">Seguro.</span></h2>
+    <div class="section-line"></div>
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-num">01</div>
+        <div class="how-title" data-es="Crea tu cuenta" data-en="Create your account">Crea tu cuenta</div>
+        <div class="how-desc" data-es="Elige tu rol: comprador, vendedor o ambos. Tu perfil te da acceso a todas las funciones." data-en="Choose your role: buyer, seller, or both. Your profile unlocks all features.">Elige tu rol: comprador, vendedor o ambos. Tu perfil te da acceso a todas las funciones.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">02</div>
+        <div class="how-title" data-es="Publica con fotos" data-en="List with photos">Publica con fotos</div>
+        <div class="how-desc" data-es="Sube hasta 10 fotos de tu vehículo. El sistema sugiere un precio competitivo basado en el mercado actual." data-en="Upload up to 10 photos. The system suggests a competitive price based on the current market.">Sube hasta 10 fotos de tu vehículo. El sistema sugiere un precio competitivo basado en el mercado actual.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">03</div>
+        <div class="how-title" data-es="Conecta y vende" data-en="Connect and sell">Conecta y vende</div>
+        <div class="how-desc" data-es="Los compradores te contactan directamente. Gestiona tus publicaciones desde tu perfil." data-en="Buyers contact you directly. Manage your listings from your profile.">Los compradores te contactan directamente. Gestiona tus publicaciones desde tu perfil.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">04</div>
+        <div class="how-title" data-es="Filtra y descubre" data-en="Filter and discover">Filtra y descubre</div>
+        <div class="how-desc" data-es="Encuentra exactamente lo que buscas con filtros por tipo, marca, año, precio y más." data-en="Find exactly what you want with filters by type, brand, year, price, and more.">Encuentra exactamente lo que buscas con filtros por tipo, marca, año, precio y más.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Featured listings preview -->
+  <div class="section" style="padding-top:0">
+    <p class="section-eyebrow" data-es="Destacados" data-en="Featured">Destacados</p>
+    <h2 class="section-title" data-es="Vehículos <span class='gold'>Destacados</span>" data-en="<span class='gold'>Featured</span> Vehicles">Vehículos <span class="gold">Destacados</span></h2>
+    <div class="section-line"></div>
+    <div class="vehicles-grid" id="featured-grid"></div>
+    <div style="text-align:center;margin-top:36px">
+      <button class="btn btn-outline-gold" onclick="showPage('browse')" data-es="Ver todos los vehículos →" data-en="View all vehicles →">Ver todos los vehículos →</button>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <span class="nav-logo">JDS <span>AUTO</span>HUB</span>
+        <p class="footer-desc" data-es="El lugar donde compradores y vendedores de vehículos se encuentran en Colombia. Carros, motos, camionetas y más — para todos los presupuestos." data-en="The place where vehicle buyers and sellers meet in Colombia. Cars, bikes, trucks and more — for every budget.">El lugar donde compradores y vendedores de vehículos se encuentran en Colombia. Carros, motos, camionetas y más — para todos los presupuestos.</p>
+      </div>
+      <div class="footer-col">
+        <h4 data-es="Mercado" data-en="Marketplace">Mercado</h4>
+        <ul>
+          <li><a onclick="showPage('browse')" data-es="Explorar" data-en="Browse">Explorar</a></li>
+          <li><a onclick="showPage('sell')" data-es="Vender" data-en="Sell">Vender</a></li>
+          <li><a data-es="Carros" data-en="Cars">Carros</a></li>
+          <li><a data-es="Motos" data-en="Motorcycles">Motos</a></li>
+          <li><a data-es="Lujo" data-en="Luxury">Lujo</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4 data-es="Cuenta" data-en="Account">Cuenta</h4>
+        <ul>
+          <li><a onclick="openAuthModal('register')" data-es="Registrarse" data-en="Sign Up">Registrarse</a></li>
+          <li><a onclick="openAuthModal('login')" data-es="Ingresar" data-en="Sign In">Ingresar</a></li>
+          <li><a onclick="showPage('profile')" data-es="Mi Perfil" data-en="My Profile">Mi Perfil</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4 data-es="Soporte" data-en="Support">Soporte</h4>
+        <ul>
+          <li><a data-es="Centro de ayuda" data-en="Help Center">Centro de ayuda</a></li>
+          <li><a data-es="Términos" data-en="Terms">Términos</a></li>
+          <li><a data-es="Privacidad" data-en="Privacy">Privacidad</a></li>
+          <li><a data-es="Contacto" data-en="Contact">Contacto</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 JDS AutoHub. <span data-es="Todos los derechos reservados." data-en="All rights reserved.">Todos los derechos reservados.</span></span>
+      <span data-es="Hecho con ♥ en Colombia" data-en="Made with ♥ in Colombia">Hecho con ♥ en Colombia</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ═══════════ PAGE: BROWSE ═══════════ -->
+<div id="page-browse" class="page">
+  <div class="section">
+    <p class="section-eyebrow" data-es="Catálogo completo" data-en="All vehicles">Catálogo completo</p>
+    <h2 class="section-title" data-es="Explorar <span class='gold'>Vehículos</span>" data-en="Browse <span class='gold'>Vehicles</span>">Explorar <span class="gold">Vehículos</span></h2>
+    <div class="section-line"></div>
+
+    <div class="search-bar-wrap" style="max-width:100%;margin-bottom:20px">
+      <span class="search-icon">🔍</span>
+      <input class="search-bar" type="text" id="search-input" placeholder="Buscar por marca, modelo, año..." oninput="filterListings()">
+    </div>
+
+    <div class="filters-bar">
+      <div class="filter-group">
+        <label data-es="Tipo" data-en="Type">Tipo</label>
+        <select id="f-type" onchange="filterListings()">
+          <option value="" data-es="Todos" data-en="All">Todos</option>
+          <option value="car" data-es="Carros" data-en="Cars">Carros</option>
+          <option value="truck" data-es="Camionetas" data-en="Trucks">Camionetas</option>
+          <option value="luxury" data-es="Lujo" data-en="Luxury">Lujo</option>
+          <option value="moto" data-es="Motos" data-en="Motos">Motos</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label data-es="Marca" data-en="Brand">Marca</label>
+        <select id="f-brand" onchange="filterListings()">
+          <option value="" data-es="Todas" data-en="All">Todas</option>
+          <option>Toyota</option><option>Ford</option><option>BMW</option>
+          <option>Mercedes</option><option>Chevrolet</option><option>Mazda</option>
+          <option>Honda</option><option>Yamaha</option><option>KTM</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label data-es="Año desde" data-en="Year from">Año desde</label>
+        <select id="f-year" onchange="filterListings()">
+          <option value="">—</option>
+          <option>2024</option><option>2023</option><option>2022</option>
+          <option>2021</option><option>2020</option><option>2019</option>
+          <option>2018</option><option>2015</option><option>2010</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label data-es="Precio máx." data-en="Max price">Precio máx.</label>
+        <select id="f-price" onchange="filterListings()">
+          <option value="">—</option>
+          <option value="30000">$30,000</option><option value="50000">$50,000</option>
+          <option value="80000">$80,000</option><option value="120000">$120,000</option>
+          <option value="200000">$200,000</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label data-es="Transmisión" data-en="Transmission">Transmisión</label>
+        <select id="f-trans" onchange="filterListings()">
+          <option value="" data-es="Todas" data-en="All">Todas</option>
+          <option value="auto" data-es="Automático" data-en="Automatic">Automático</option>
+          <option value="manual" data-es="Manual" data-en="Manual">Manual</option>
+        </select>
+      </div>
+      <div class="filter-group" style="display:flex;align-items:flex-end">
+        <button class="btn btn-ghost" onclick="clearFilters()" style="width:100%" data-es="Limpiar filtros" data-en="Clear filters">Limpiar filtros</button>
+      </div>
+    </div>
+
+    <div id="results-count" style="font-size:13px;color:var(--muted);margin-bottom:20px;letter-spacing:.5px"></div>
+    <div class="vehicles-grid" id="browse-grid"></div>
+    <div id="browse-empty" class="empty-state" style="display:none">
+      <div class="empty-icon">🚗</div>
+      <div class="empty-title" data-es="Sin resultados" data-en="No results">Sin resultados</div>
+      <div class="empty-text" data-es="Prueba con otros filtros o busca un término diferente." data-en="Try different filters or a different search term.">Prueba con otros filtros o busca un término diferente.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PAGE: SELL ═══════════ -->
+<div id="page-sell" class="page">
+  <div class="section" id="sell-guard" style="display:none">
+    <div class="guard-msg">
+      <div class="guard-icon">🔑</div>
+      <div class="guard-title" data-es="Inicia sesión para publicar" data-en="Sign in to list a vehicle">Inicia sesión para publicar</div>
+      <div class="guard-text" data-es="Necesitas una cuenta para publicar tu vehículo en JDS AutoHub." data-en="You need an account to list your vehicle on JDS AutoHub.">Necesitas una cuenta para publicar tu vehículo en JDS AutoHub.</div>
+      <button class="btn btn-gold" onclick="openAuthModal('register')" data-es="Crear cuenta gratis" data-en="Create a free account">Crear cuenta gratis</button>
+    </div>
+  </div>
+  <div class="section" id="sell-form-section">
+    <p class="section-eyebrow" data-es="Nueva publicación" data-en="New listing">Nueva publicación</p>
+    <h2 class="section-title" data-es="Publicar <span class='gold'>Vehículo</span>" data-en="List your <span class='gold'>Vehicle</span>">Publicar <span class="gold">Vehículo</span></h2>
+    <div class="section-line"></div>
+    <div class="sell-layout">
+      <div>
+        <!-- STEP 1 -->
+        <div class="sell-card" style="margin-bottom:24px">
+          <div class="sell-card-title" data-es="1 — Información del vehículo" data-en="1 — Vehicle details">1 — Información del vehículo</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label data-es="Tipo de vehículo" data-en="Vehicle type">Tipo de vehículo</label>
+              <select id="s-type" onchange="updatePriceSuggestion()">
+                <option value="" data-es="Selecciona..." data-en="Select...">Selecciona...</option>
+                <option value="car">Carro / Car</option>
+                <option value="truck">Camioneta / Truck</option>
+                <option value="luxury">Lujo / Luxury</option>
+                <option value="moto">Moto / Motorcycle</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label data-es="Marca" data-en="Brand">Marca</label>
+              <select id="s-brand" onchange="updatePriceSuggestion()">
+                <option value="">—</option>
+                <option>Toyota</option><option>Ford</option><option>BMW</option>
+                <option>Mercedes</option><option>Chevrolet</option><option>Mazda</option>
+                <option>Honda</option><option>Yamaha</option><option>KTM</option>
+                <option>Renault</option><option>Kia</option><option>Audi</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label data-es="Modelo" data-en="Model">Modelo</label>
+              <input type="text" id="s-model" placeholder="ej. Corolla, Ranger..." oninput="updatePriceSuggestion()">
+            </div>
+            <div class="form-group">
+              <label data-es="Año" data-en="Year">Año</label>
+              <input type="number" id="s-year" placeholder="2022" min="1990" max="2025" oninput="updatePriceSuggestion()">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label data-es="Kilometraje" data-en="Mileage">Kilometraje</label>
+              <input type="number" id="s-km" placeholder="45000" oninput="updatePriceSuggestion()">
+            </div>
+            <div class="form-group">
+              <label data-es="Transmisión" data-en="Transmission">Transmisión</label>
+              <select id="s-trans">
+                <option value="auto" data-es="Automático" data-en="Automatic">Automático</option>
+                <option value="manual" data-es="Manual" data-en="Manual">Manual</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label data-es="Color" data-en="Color">Color</label>
+              <input type="text" id="s-color" placeholder="Blanco, Negro, Rojo...">
+            </div>
+            <div class="form-group">
+              <label data-es="Ciudad" data-en="City">Ciudad</label>
+              <input type="text" id="s-city" placeholder="Bogotá, Medellín...">
+            </div>
+          </div>
+          <div class="form-group">
+            <label data-es="Descripción" data-en="Description">Descripción</label>
+            <textarea id="s-desc" rows="4" placeholder="Describe el estado, historial, extras..."></textarea>
+          </div>
+        </div>
+
+        <!-- STEP 2: Photos -->
+        <div class="sell-card" style="margin-bottom:24px">
+          <div class="sell-card-title" data-es="2 — Fotos" data-en="2 — Photos">2 — Fotos</div>
+          <div class="upload-area" onclick="document.getElementById('photo-input').click()">
+            <input type="file" id="photo-input" accept="image/*" multiple onchange="handlePhotos(event)">
+            <span class="upload-icon">📷</span>
+            <div class="upload-label" data-es="Arrastra fotos o haz clic para subir" data-en="Drag photos or click to upload">Arrastra fotos o haz clic para subir</div>
+            <div class="upload-hint" data-es="Máx. 10 fotos · JPG, PNG · Hasta 5 MB c/u" data-en="Max 10 photos · JPG, PNG · Up to 5 MB each">Máx. 10 fotos · JPG, PNG · Hasta 5 MB c/u</div>
+          </div>
+          <div class="photo-previews" id="photo-previews"></div>
+        </div>
+
+        <!-- STEP 3: Price -->
+        <div class="sell-card">
+          <div class="sell-card-title" data-es="3 — Precio" data-en="3 — Price">3 — Precio</div>
+          <div class="price-suggestion" id="price-suggestion">
+            <div class="price-sug-label" data-es="💡 Precio sugerido por JDS AutoHub" data-en="💡 Price suggested by JDS AutoHub">💡 Precio sugerido por JDS AutoHub</div>
+            <div class="price-sug-value" id="price-sug-val">$28,500</div>
+            <div class="price-sug-range" id="price-sug-range">Rango del mercado: $25,000 — $34,000</div>
+          </div>
+          <div class="form-group">
+            <label data-es="Tu precio (USD)" data-en="Your price (USD)">Tu precio (USD)</label>
+            <input type="number" id="s-price" placeholder="ej. 28500">
+            <div class="form-hint" data-es="Basado en publicaciones similares en el mercado actual." data-en="Based on similar listings in the current market.">Basado en publicaciones similares en el mercado actual.</div>
+          </div>
+          <button class="btn btn-gold" style="width:100%;padding:14px" onclick="submitListing()" data-es="Publicar vehículo →" data-en="Publish listing →">Publicar vehículo →</button>
+        </div>
+      </div>
+
+      <!-- SIDEBAR -->
+      <div>
+        <div class="tips-card">
+          <div class="tips-title" data-es="💡 Consejos para vender más rápido" data-en="💡 Tips to sell faster">💡 Consejos para vender más rápido</div>
+          <div class="tip-item"><span class="tip-icon">📸</span><span data-es="Toma fotos con buena luz y desde múltiples ángulos." data-en="Shoot in good light from multiple angles.">Toma fotos con buena luz y desde múltiples ángulos.</span></div>
+          <div class="tip-item"><span class="tip-icon">📝</span><span data-es="Una descripción detallada genera hasta 3× más contactos." data-en="A detailed description generates up to 3× more contacts.">Una descripción detallada genera hasta 3× más contactos.</span></div>
+          <div class="tip-item"><span class="tip-icon">💰</span><span data-es="Usa el precio sugerido — los vehículos en rango venden 60% más rápido." data-en="Use the suggested price — in-range vehicles sell 60% faster.">Usa el precio sugerido — los vehículos en rango venden 60% más rápido.</span></div>
+          <div class="tip-item"><span class="tip-icon">✅</span><span data-es="Incluye historial de mantenimiento si está disponible." data-en="Include service history if available.">Incluye historial de mantenimiento si está disponible.</span></div>
+        </div>
+        <div class="sell-card">
+          <div class="sell-card-title" data-es="Precios del mercado" data-en="Market prices">Precios del mercado</div>
+          <div id="market-data" style="font-size:13px;color:var(--muted);line-height:2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PAGE: PROFILE ═══════════ -->
+<div id="page-profile" class="page">
+  <div id="profile-guard" style="display:none">
+    <div class="guard-msg">
+      <div class="guard-icon">👤</div>
+      <div class="guard-title" data-es="Inicia sesión para ver tu perfil" data-en="Sign in to see your profile">Inicia sesión para ver tu perfil</div>
+      <div class="guard-text" data-es="Tu perfil muestra tus publicaciones, favoritos y configuración." data-en="Your profile shows your listings, favorites, and settings.">Tu perfil muestra tus publicaciones, favoritos y configuración.</div>
+      <button class="btn btn-gold" onclick="openAuthModal('login')" data-es="Ingresar" data-en="Sign In">Ingresar</button>
+    </div>
+  </div>
+  <div id="profile-content">
+    <div class="profile-header">
+      <div class="profile-avatar-wrap">
+        <div class="profile-avatar" id="profile-av-initials">JD</div>
+      </div>
+      <div class="profile-info">
+        <div class="profile-name" id="profile-name-display">Juan David</div>
+        <div class="profile-role" id="profile-role-badge">🚗 Vendedor</div>
+        <div class="profile-meta" id="profile-meta-display">Miembro desde 2025 · Bogotá, Colombia</div>
+      </div>
+      <button class="btn btn-ghost" onclick="openEditProfile()" data-es="Editar perfil" data-en="Edit profile">Editar perfil</button>
+    </div>
+    <div class="profile-stats">
+      <div class="profile-stat">
+        <div class="profile-stat-num" id="ps-listings">0</div>
+        <div class="profile-stat-label" data-es="Publicaciones" data-en="Listings">Publicaciones</div>
+      </div>
+      <div class="profile-stat">
+        <div class="profile-stat-num" id="ps-sold">0</div>
+        <div class="profile-stat-label" data-es="Vendidos" data-en="Sold">Vendidos</div>
+      </div>
+      <div class="profile-stat">
+        <div class="profile-stat-num" id="ps-favs">0</div>
+        <div class="profile-stat-label" data-es="Favoritos" data-en="Favorites">Favoritos</div>
+      </div>
+    </div>
+    <div class="profile-tabs">
+      <button class="profile-tab active" onclick="switchProfileTab('listings', this)" data-es="Mis publicaciones" data-en="My listings">Mis publicaciones</button>
+      <button class="profile-tab" onclick="switchProfileTab('favorites', this)" data-es="Favoritos" data-en="Favorites">Favoritos</button>
+      <button class="profile-tab" onclick="switchProfileTab('settings', this)" data-es="Configuración" data-en="Settings">Configuración</button>
+    </div>
+    <div class="section" style="padding-top:32px">
+      <!-- Listings tab -->
+      <div id="tab-listings">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+          <span style="font-size:13px;color:var(--muted)" id="my-listings-count">0 publicaciones</span>
+          <button class="btn btn-gold" onclick="showPage('sell')" data-es="+ Nueva publicación" data-en="+ New listing">+ Nueva publicación</button>
+        </div>
+        <div class="vehicles-grid" id="my-listings-grid"></div>
+        <div id="my-listings-empty" class="empty-state">
+          <div class="empty-icon">🚗</div>
+          <div class="empty-title" data-es="Aún no tienes publicaciones" data-en="No listings yet">Aún no tienes publicaciones</div>
+          <div class="empty-text" data-es="Publica tu primer vehículo y llega a miles de compradores." data-en="List your first vehicle and reach thousands of buyers.">Publica tu primer vehículo y llega a miles de compradores.</div>
+          <button class="btn btn-gold" style="margin-top:20px" onclick="showPage('sell')" data-es="Publicar ahora" data-en="Publish now">Publicar ahora</button>
+        </div>
+      </div>
+      <!-- Favorites tab -->
+      <div id="tab-favorites" style="display:none">
+        <div class="vehicles-grid" id="fav-grid"></div>
+        <div id="fav-empty" class="empty-state">
+          <div class="empty-icon">♡</div>
+          <div class="empty-title" data-es="Sin favoritos aún" data-en="No favorites yet">Sin favoritos aún</div>
+          <div class="empty-text" data-es="Guarda vehículos que te interesen para encontrarlos fácilmente." data-en="Save vehicles you're interested in for easy access.">Guarda vehículos que te interesen para encontrarlos fácilmente.</div>
+        </div>
+      </div>
+      <!-- Settings tab -->
+      <div id="tab-settings" style="display:none">
+        <div style="max-width:480px">
+          <div class="sell-card">
+            <div class="sell-card-title" data-es="Información personal" data-en="Personal information">Información personal</div>
+            <div class="form-group">
+              <label data-es="Nombre completo" data-en="Full name">Nombre completo</label>
+              <input type="text" id="set-name" placeholder="Tu nombre">
+            </div>
+            <div class="form-group">
+              <label data-es="Correo electrónico" data-en="Email">Correo electrónico</label>
+              <input type="email" id="set-email" placeholder="tu@email.com">
+            </div>
+            <div class="form-group">
+              <label data-es="Ciudad" data-en="City">Ciudad</label>
+              <input type="text" id="set-city" placeholder="Bogotá">
+            </div>
+            <div class="form-group">
+              <label data-es="Teléfono" data-en="Phone">Teléfono</label>
+              <input type="tel" id="set-phone" placeholder="+57 300...">
+            </div>
+            <div class="form-group">
+              <label data-es="Rol en la plataforma" data-en="Platform role">Rol en la plataforma</label>
+              <div class="role-selector" style="margin-top:0">
+                <label class="role-option" id="role-buyer" onclick="selectRole('buyer')">
+                  <input type="radio" name="set-role" value="buyer">
+                  <span class="role-icon">🔍</span>
+                  <div class="role-label" data-es="Comprador" data-en="Buyer">Comprador</div>
+                  <div class="role-desc" data-es="Busco vehículos" data-en="I'm looking to buy">Busco vehículos</div>
+                </label>
+                <label class="role-option" id="role-seller" onclick="selectRole('seller')">
+                  <input type="radio" name="set-role" value="seller">
+                  <span class="role-icon">🚗</span>
+                  <div class="role-label" data-es="Vendedor" data-en="Seller">Vendedor</div>
+                  <div class="role-desc" data-es="Publico vehículos" data-en="I sell vehicles">Publico vehículos</div>
+                </label>
+              </div>
+            </div>
+            <button class="btn btn-gold" onclick="saveSettings()" style="width:100%;padding:12px" data-es="Guardar cambios" data-en="Save changes">Guardar cambios</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ MODALS ═══════════ -->
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="auth-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">JDS <span>AUTO</span>HUB</div>
+      <button class="modal-close" onclick="closeModal('auth-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-tabs">
+        <button class="modal-tab active" id="tab-login" onclick="switchAuthTab('login')" data-es="Ingresar" data-en="Sign In">Ingresar</button>
+        <button class="modal-tab" id="tab-register" onclick="switchAuthTab('register')" data-es="Registrarse" data-en="Register">Registrarse</button>
+      </div>
+      <!-- LOGIN -->
+      <div id="auth-login" class="tab-content active">
+        <div class="form-group">
+          <label data-es="Correo electrónico" data-en="Email">Correo electrónico</label>
+          <input type="email" id="login-email" placeholder="tu@email.com">
+        </div>
+        <div class="form-group">
+          <label data-es="Contraseña" data-en="Password">Contraseña</label>
+          <input type="password" id="login-pass" placeholder="••••••••">
+        </div>
+        <button class="btn btn-gold" style="width:100%;padding:14px;margin-top:8px" onclick="doLogin()" data-es="Ingresar a mi cuenta" data-en="Sign in to my account">Ingresar a mi cuenta</button>
+        <div class="form-divider" data-es="¿No tienes cuenta?" data-en="No account?">¿No tienes cuenta?</div>
+        <button class="btn btn-ghost" style="width:100%;padding:12px" onclick="switchAuthTab('register')" data-es="Crear cuenta gratis" data-en="Create a free account">Crear cuenta gratis</button>
+      </div>
+      <!-- REGISTER -->
+      <div id="auth-register" class="tab-content">
+        <div class="form-row">
+          <div class="form-group">
+            <label data-es="Nombre" data-en="First name">Nombre</label>
+            <input type="text" id="reg-fname" placeholder="Juan">
+          </div>
+          <div class="form-group">
+            <label data-es="Apellido" data-en="Last name">Apellido</label>
+            <input type="text" id="reg-lname" placeholder="Díaz">
+          </div>
+        </div>
+        <div class="form-group">
+          <label data-es="Correo electrónico" data-en="Email">Correo electrónico</label>
+          <input type="email" id="reg-email" placeholder="tu@email.com">
+        </div>
+        <div class="form-group">
+          <label data-es="Contraseña" data-en="Password">Contraseña</label>
+          <input type="password" id="reg-pass" placeholder="Mínimo 8 caracteres">
+        </div>
+        <div class="form-group">
+          <label data-es="¿Cuál es tu rol?" data-en="What's your role?">¿Cuál es tu rol?</label>
+          <div class="role-selector">
+            <label class="role-option selected" id="reg-role-buyer" onclick="selectRegRole('buyer')">
+              <input type="radio" name="reg-role" value="buyer" checked>
+              <span class="role-icon">🔍</span>
+              <div class="role-label" data-es="Comprador" data-en="Buyer">Comprador</div>
+              <div class="role-desc" data-es="Busco vehículos" data-en="Looking to buy">Busco vehículos</div>
+            </label>
+            <label class="role-option" id="reg-role-seller" onclick="selectRegRole('seller')">
+              <input type="radio" name="reg-role" value="seller">
+              <span class="role-icon">🚗</span>
+              <div class="role-label" data-es="Vendedor" data-en="Seller">Vendedor</div>
+              <div class="role-desc" data-es="Quiero vender" data-en="Want to sell">Quiero vender</div>
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label data-es="Ciudad" data-en="City">Ciudad</label>
+          <input type="text" id="reg-city" placeholder="Bogotá, Medellín, Cali...">
+        </div>
+        <button class="btn btn-gold" style="width:100%;padding:14px;margin-top:8px" onclick="doRegister()" data-es="Crear mi cuenta" data-en="Create my account">Crear mi cuenta</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VEHICLE DETAIL MODAL -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal detail-modal" style="max-width:780px">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="dm-title">BMW Serie 5</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px" id="dm-sub">2022 · 18,000 km</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('detail-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="dm-imgs" class="detail-imgs"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+        <div style="font-family:var(--font-display);font-size:44px;letter-spacing:2px;color:var(--gold)" id="dm-price">$45,000</div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-ghost" onclick="toggleFav()" id="fav-btn" data-es="♡ Guardar" data-en="♡ Save">♡ Guardar</button>
+          <button class="btn btn-gold" onclick="contactSeller()" data-es="Contactar vendedor" data-en="Contact seller">Contactar vendedor</button>
+        </div>
+      </div>
+      <div class="detail-grid" id="dm-grid"></div>
+      <div class="form-group" style="margin-top:16px">
+        <label data-es="Descripción" data-en="Description">Descripción</label>
+        <p id="dm-desc" style="font-size:14px;color:var(--muted);line-height:1.7;margin-top:6px"></p>
+      </div>
+      <div class="seller-box">
+        <div class="seller-av" id="dm-seller-av">JD</div>
+        <div>
+          <div class="seller-name" id="dm-seller-name">Vendedor</div>
+          <div class="seller-meta" id="dm-seller-meta">Miembro JDS AutoHub</div>
+        </div>
+        <button class="btn btn-ghost" style="margin-left:auto" onclick="contactSeller()" data-es="Contactar" data-en="Contact">Contactar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════ SCRIPTS ═══════════ -->
+<script>
+// ─── STATE ────────────────────────────────────
+let currentLang = 'es';
+let currentUser = null;
+let listings = [];
+let myPhotos = [];
+let favorites = [];
+let currentDetailId = null;
+
+// ─── SAMPLE DATA ─────────────────────────────
+const sampleListings = [
+  { id:1, type:'luxury', brand:'BMW', model:'Serie 5 530i', year:2022, km:18000, trans:'auto', color:'Negro', city:'Bogotá', price:45000, desc:'Vehículo en excelente estado. Un solo dueño, mantenimiento al día en concesionario BMW. Cuenta con sunroof panorámico, pantalla táctil 10.25", asientos de cuero Nappa y sistema HiFi Harman Kardon.', seller:'Carlos Mejía', badge:'luxury', photos:['https://images.unsplash.com/photo-1555215695-3004980ad54e?w=500&q=80','https://images.unsplash.com/photo-1617469767698-4fcff3c2b9bc?w=500&q=80'] },
+  { id:2, type:'truck', brand:'Toyota', model:'Hilux 4x4 SR5', year:2023, km:9500, trans:'auto', color:'Blanco', city:'Medellín', price:38000, desc:'Hilux de trabajo y aventura. Jaladores de arco, protector de tolva, sensores delanteros y traseros, cámara de reversa. Ideal para ciudad y campo.', seller:'Andrés Vargas', badge:'truck', photos:['https://images.unsplash.com/photo-1558979158-65a1eaa08691?w=500&q=80'] },
+  { id:3, type:'car', brand:'Mazda', model:'CX-5 GT AWD', year:2021, km:32000, trans:'auto', color:'Rojo', city:'Cali', price:29500, desc:'CX-5 en versión tope de gama. Bose 10 parlantes, HUD, asistente de carril, frenado automático de emergencia. Único dueño, no accidentado.', seller:'Laura Jiménez', badge:'car', photos:['https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=500&q=80'] },
+  { id:4, type:'luxury', brand:'Mercedes', model:'Clase C 300 AMG', year:2023, km:5200, trans:'auto', color:'Gris', city:'Bogotá', price:62000, desc:'Mercedes Clase C más nuevo. Paquete AMG completo, faros multibeam LED, sistema MBUX con AR-Navigation, cámara 360°. Garantía de fábrica vigente.', seller:'Diego Restrepo', badge:'luxury', photos:['https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=500&q=80'] },
+  { id:5, type:'moto', brand:'KTM', model:'Duke 390', year:2022, km:8700, trans:'manual', color:'Naranja', city:'Pereira', price:5800, desc:'KTM Duke 390 en perfecto estado. TFT color, quickshifter, control de tracción. Ideal para ciudad y carretera.', seller:'Sebastián Mora', badge:'moto', photos:['https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=500&q=80'] },
+  { id:6, type:'car', brand:'Chevrolet', model:'Onix Plus LTZ Turbo', year:2023, km:15000, trans:'auto', color:'Azul', city:'Bucaramanga', price:18500, desc:'Onix Plus turbocargado automático, pantalla MyLink, Wi-Fi integrado, Apple CarPlay y Android Auto. Impecable.', seller:'Paola Torres', badge:'car', photos:['https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=500&q=80'] },
+];
+
+// Market price reference data
+const marketPrices = {
+  car:    { base: 15000, perYear: 1200, perKm: -0.05 },
+  truck:  { base: 28000, perYear: 1800, perKm: -0.06 },
+  luxury: { base: 45000, perYear: 2500, perKm: -0.08 },
+  moto:   { base: 4000,  perYear: 400,  perKm: -0.02 },
+};
+
+// ─── INIT ─────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  listings = [...sampleListings];
+  renderGrid('featured-grid', listings.slice(0,3));
+  renderGrid('browse-grid', listings);
+  updateResultsCount(listings.length);
+  updateMarketData();
+  updateSellGuard();
+  updateProfileGuard();
+  applyLang();
+});
+
+// ─── NAV & PAGES ──────────────────────────────
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+  if (id === 'browse') { renderGrid('browse-grid', listings); updateResultsCount(listings.length); }
+  if (id === 'profile') { updateProfilePage(); }
+  if (id === 'sell') { updateSellGuard(); }
+}
+
+// ─── AUTH ─────────────────────────────────────
+function openAuthModal(tab) {
+  document.getElementById('auth-modal').classList.add('open');
+  switchAuthTab(tab);
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+function switchAuthTab(tab) {
+  ['login','register'].forEach(t => {
+    document.getElementById('auth-' + t).classList.toggle('active', t === tab);
+    document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+  });
+}
+
+function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  if (!email || !pass) { showToast(currentLang==='es'?'Completa todos los campos':'Fill in all fields'); return; }
+
+  // Simulated login — any credentials work
+  const name = email.split('@')[0].replace(/[._]/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+  currentUser = { name, email, role: 'seller', city: 'Colombia', listings: [], favorites: [] };
+  onLogin();
+}
+
+function doRegister() {
+  const fn   = document.getElementById('reg-fname').value.trim();
+  const ln   = document.getElementById('reg-lname').value.trim();
+  const em   = document.getElementById('reg-email').value.trim();
+  const pass = document.getElementById('reg-pass').value;
+  const city = document.getElementById('reg-city').value.trim();
+  const role = document.querySelector('input[name="reg-role"]:checked')?.value || 'buyer';
+  if (!fn || !ln || !em || !pass) { showToast(currentLang==='es'?'Completa todos los campos':'Fill in all fields'); return; }
+  if (pass.length < 8) { showToast(currentLang==='es'?'La contraseña debe tener al menos 8 caracteres':'Password must be at least 8 characters'); return; }
+  currentUser = { name: fn + ' ' + ln, email: em, role, city: city||'Colombia', listings: [], favorites: [] };
+  onLogin();
+}
+
+function onLogin() {
+  closeModal('auth-modal');
+  document.getElementById('auth-buttons').style.display = 'none';
+  document.getElementById('user-menu').style.display = 'flex';
+  document.getElementById('user-nav-name').textContent = currentUser.name.split(' ')[0];
+  updateProfilePage();
+  updateSellGuard();
+  updateProfileGuard();
+  showToast(currentLang==='es'?`¡Bienvenido, ${currentUser.name.split(' ')[0]}!`:`Welcome, ${currentUser.name.split(' ')[0]}!`);
+}
+
+function logout() {
+  currentUser = null;
+  document.getElementById('auth-buttons').style.display = 'flex';
+  document.getElementById('user-menu').style.display = 'none';
+  updateSellGuard();
+  updateProfileGuard();
+  showToast(currentLang==='es'?'Has cerrado sesión':'Session closed');
+}
+
+// ─── GUARDS ───────────────────────────────────
+function updateSellGuard() {
+  document.getElementById('sell-guard').style.display     = currentUser ? 'none' : 'block';
+  document.getElementById('sell-form-section').style.display = currentUser ? 'block' : 'none';
+}
+function updateProfileGuard() {
+  document.getElementById('profile-guard').style.display   = currentUser ? 'none' : 'block';
+  document.getElementById('profile-content').style.display = currentUser ? 'block' : 'none';
+}
+
+// ─── PROFILE PAGE ─────────────────────────────
+function updateProfilePage() {
+  if (!currentUser) return;
+  document.getElementById('profile-name-display').textContent = currentUser.name;
+  document.getElementById('profile-av-initials').textContent  = currentUser.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const roleMap = { buyer: currentLang==='es'?'🔍 Comprador':'🔍 Buyer', seller: currentLang==='es'?'🚗 Vendedor':'🚗 Seller' };
+  document.getElementById('profile-role-badge').textContent   = roleMap[currentUser.role] || '🔍';
+  document.getElementById('profile-meta-display').textContent = `${currentLang==='es'?'Miembro desde':'Member since'} 2025 · ${currentUser.city}`;
+  document.getElementById('ps-listings').textContent = currentUser.listings.length;
+  document.getElementById('ps-sold').textContent = 0;
+  document.getElementById('ps-favs').textContent = favorites.length;
+  document.getElementById('my-listings-count').textContent = currentUser.listings.length + (currentLang==='es'?' publicaciones':' listings');
+  renderGrid('my-listings-grid', currentUser.listings);
+  document.getElementById('my-listings-empty').style.display = currentUser.listings.length ? 'none' : 'block';
+  document.getElementById('set-name').value  = currentUser.name;
+  document.getElementById('set-email').value = currentUser.email;
+  document.getElementById('set-city').value  = currentUser.city;
+  selectRole(currentUser.role);
+}
+
+function switchProfileTab(tab, el) {
+  ['listings','favorites','settings'].forEach(t => {
+    document.getElementById('tab-' + t).style.display = (t === tab) ? 'block' : 'none';
+  });
+  document.querySelectorAll('.profile-tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  if (tab === 'favorites') {
+    renderGrid('fav-grid', favorites);
+    document.getElementById('fav-empty').style.display = favorites.length ? 'none' : 'block';
+  }
+}
+
+function saveSettings() {
+  if (!currentUser) return;
+  currentUser.name  = document.getElementById('set-name').value.trim() || currentUser.name;
+  currentUser.email = document.getElementById('set-email').value.trim() || currentUser.email;
+  currentUser.city  = document.getElementById('set-city').value.trim() || currentUser.city;
+  const r = document.querySelector('input[name="set-role"]:checked');
+  if (r) currentUser.role = r.value;
+  updateProfilePage();
+  showToast(currentLang==='es'?'Perfil actualizado':'Profile updated');
+}
+
+function selectRole(role) {
+  ['buyer','seller'].forEach(r => document.getElementById('role-'+r)?.classList.toggle('selected', r===role));
+  const inp = document.querySelector(`input[name="set-role"][value="${role}"]`);
+  if (inp) inp.checked = true;
+}
+
+function selectRegRole(role) {
+  ['buyer','seller'].forEach(r => document.getElementById('reg-role-'+r)?.classList.toggle('selected', r===role));
+}
+
+function openEditProfile() { switchProfileTab('settings', document.querySelectorAll('.profile-tab')[2]); }
+
+// ─── LISTINGS RENDER ──────────────────────────
+function renderGrid(gridId, items) {
+  const grid = document.getElementById(gridId);
+  if (!grid) return;
+  if (!items.length) { grid.innerHTML = ''; return; }
+  grid.innerHTML = items.map(v => cardHTML(v)).join('');
+}
+
+function cardHTML(v) {
+  const badgeLabel = { car:'Auto', truck:'Camioneta', luxury:'Lujo', moto:'Moto' };
+  const img = v.photos?.[0] || 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=500&q=80';
+  return `
+  <div class="vehicle-card" onclick="openDetail(${v.id})">
+    <div class="card-img-wrap">
+      <img src="${img}" alt="${v.brand} ${v.model}" loading="lazy">
+      <span class="card-badge ${v.badge}">${badgeLabel[v.type]||v.type}</span>
+    </div>
+    <div class="card-body">
+      <div class="card-brand">${v.brand}</div>
+      <div class="card-name">${v.model}</div>
+      <div class="card-details">
+        <span class="card-detail">📅 ${v.year}</span>
+        <span class="card-detail">🛣️ ${Number(v.km).toLocaleString()} km</span>
+        <span class="card-detail">⚙️ ${v.trans === 'auto' ? (currentLang==='es'?'Aut.':'Auto'):currentLang==='es'?'Man.':'Manual'}</span>
+      </div>
+      <div class="card-footer">
+        <div>
+          <div class="card-price">$${Number(v.price).toLocaleString()}</div>
+          <div class="card-price-sub" data-es="USD negociable" data-en="USD negotiable">${currentLang==='es'?'USD negociable':'USD negotiable'}</div>
+        </div>
+        <span style="font-size:11px;color:var(--muted)">📍 ${v.city}</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ─── FILTERS ──────────────────────────────────
+function filterListings() {
+  const q     = document.getElementById('search-input').value.toLowerCase();
+  const type  = document.getElementById('f-type').value;
+  const brand = document.getElementById('f-brand').value;
+  const year  = parseInt(document.getElementById('f-year').value) || 0;
+  const price = parseInt(document.getElementById('f-price').value) || 0;
+  const trans = document.getElementById('f-trans').value;
+
+  const filtered = listings.filter(v => {
+    const txt = `${v.brand} ${v.model} ${v.city} ${v.year}`.toLowerCase();
+    return (
+      (!q     || txt.includes(q)) &&
+      (!type  || v.type === type) &&
+      (!brand || v.brand === brand) &&
+      (!year  || v.year >= year) &&
+      (!price || v.price <= price) &&
+      (!trans || v.trans === trans)
+    );
+  });
+
+  renderGrid('browse-grid', filtered);
+  updateResultsCount(filtered.length);
+  document.getElementById('browse-empty').style.display = filtered.length ? 'none' : 'block';
+}
+
+function clearFilters() {
+  ['f-type','f-brand','f-year','f-price','f-trans'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('search-input').value = '';
+  filterListings();
+}
+
+function updateResultsCount(n) {
+  const el = document.getElementById('results-count');
+  if (el) el.textContent = currentLang==='es'?`${n} vehículo${n===1?'':'s'} encontrado${n===1?'':'s'}`:`${n} vehicle${n===1?'':'s'} found`;
+}
+
+// ─── DETAIL MODAL ─────────────────────────────
+function openDetail(id) {
+  const v = listings.find(x => x.id === id);
+  if (!v) return;
+  currentDetailId = id;
+  document.getElementById('dm-title').textContent = `${v.brand} ${v.model}`;
+  document.getElementById('dm-sub').textContent   = `${v.year} · ${Number(v.km).toLocaleString()} km · ${v.city}`;
+  document.getElementById('dm-price').textContent = `$${Number(v.price).toLocaleString()}`;
+  document.getElementById('dm-desc').textContent  = v.desc;
+  document.getElementById('dm-seller-name').textContent = v.seller || 'Vendedor';
+  document.getElementById('dm-seller-av').textContent   = (v.seller||'V').split(' ').map(w=>w[0]).join('').slice(0,2);
+  document.getElementById('dm-seller-meta').textContent = `${currentLang==='es'?'Miembro':'Member'} JDS AutoHub · ${v.city}`;
+
+  const imgs = document.getElementById('dm-imgs');
+  imgs.innerHTML = (v.photos||[]).map((src,i) =>
+    `<img class="detail-img${i===0?' main':''}" src="${src}" alt="">`).join('');
+
+  const fields = [
+    ['Tipo','Type', { car:'Carro/Car', truck:'Camioneta/Truck', luxury:'Lujo/Luxury', moto:'Moto' }[v.type]||v.type],
+    ['Marca','Brand', v.brand],
+    ['Año','Year', v.year],
+    ['Kilometraje','Mileage', Number(v.km).toLocaleString() + ' km'],
+    ['Transmisión','Transmission', v.trans==='auto'?'Automático / Automatic':'Manual'],
+    ['Color','Color', v.color],
+    ['Ciudad','City', v.city],
+  ];
+  document.getElementById('dm-grid').innerHTML = fields.map(([es,en,val]) =>
+    `<div class="detail-field"><label>${currentLang==='es'?es:en}</label><span>${val}</span></div>`
+  ).join('');
+
+  const isFav = favorites.find(x => x.id === id);
+  document.getElementById('fav-btn').textContent = isFav
+    ? (currentLang==='es'?'♥ Guardado':'♥ Saved')
+    : (currentLang==='es'?'♡ Guardar':'♡ Save');
+
+  document.getElementById('detail-modal').classList.add('open');
+}
+
+// ─── FAVORITES ────────────────────────────────
+function toggleFav() {
+  if (!currentUser) { openAuthModal('login'); return; }
+  const v = listings.find(x => x.id === currentDetailId);
+  if (!v) return;
+  const idx = favorites.findIndex(x => x.id === currentDetailId);
+  if (idx === -1) {
+    favorites.push(v);
+    document.getElementById('fav-btn').textContent = currentLang==='es'?'♥ Guardado':'♥ Saved';
+    showToast(currentLang==='es'?'Agregado a favoritos':'Added to favorites');
+  } else {
+    favorites.splice(idx, 1);
+    document.getElementById('fav-btn').textContent = currentLang==='es'?'♡ Guardar':'♡ Save';
+    showToast(currentLang==='es'?'Eliminado de favoritos':'Removed from favorites');
+  }
+  if (currentUser) document.getElementById('ps-favs').textContent = favorites.length;
+}
+
+function contactSeller() {
+  closeModal('detail-modal');
+  showToast(currentLang==='es'?'📱 Función de contacto disponible próximamente':'📱 Contact feature coming soon');
+}
+
+// ─── SELL / PUBLISH ───────────────────────────
+function handlePhotos(e) {
+  const files = Array.from(e.target.files).slice(0, 10);
+  const wrap = document.getElementById('photo-previews');
+  wrap.innerHTML = '';
+  myPhotos = [];
+  files.forEach((f, i) => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      myPhotos[i] = ev.target.result;
+      const img = document.createElement('img');
+      img.className = 'photo-thumb';
+      img.src = ev.target.result;
+      img.title = currentLang==='es'?'Clic para eliminar':'Click to remove';
+      img.onclick = () => { myPhotos.splice(i,1); img.remove(); };
+      wrap.appendChild(img);
+    };
+    reader.readAsDataURL(f);
+  });
+}
+
+function updatePriceSuggestion() {
+  const type  = document.getElementById('s-type').value;
+  const brand = document.getElementById('s-brand').value;
+  const year  = parseInt(document.getElementById('s-year').value);
+  const km    = parseInt(document.getElementById('s-km').value) || 0;
+  if (!type || !year) {
+    document.getElementById('price-suggestion').classList.remove('show');
+    return;
+  }
+  const ref = marketPrices[type] || marketPrices.car;
+  const yearFactor = Math.max(0, (year - 2010)) * ref.perYear;
+  const kmFactor   = km * ref.perKm;
+  const base  = ref.base + yearFactor + kmFactor;
+  const low   = Math.round(base * 0.88 / 100) * 100;
+  const high  = Math.round(base * 1.12 / 100) * 100;
+  const mid   = Math.round(base / 100) * 100;
+  document.getElementById('price-sug-val').textContent   = `$${mid.toLocaleString()}`;
+  document.getElementById('price-sug-range').textContent =
+    `${currentLang==='es'?'Rango del mercado':'Market range'}: $${low.toLocaleString()} — $${high.toLocaleString()}`;
+  document.getElementById('price-suggestion').classList.add('show');
+  document.getElementById('s-price').placeholder = mid;
+  updateMarketData(type, brand, year);
+}
+
+function updateMarketData(type, brand, year) {
+  const el = document.getElementById('market-data');
+  if (!el) return;
+  const items = listings.filter(v =>
+    (!type || v.type === type) &&
+    (!brand || v.brand === brand)
+  ).slice(0,5);
+  if (!items.length) {
+    el.innerHTML = `<span style="color:var(--muted);font-size:13px">${currentLang==='es'?'Selecciona tipo y marca para ver referencias.':'Select type and brand to see references.'}</span>`;
+    return;
+  }
+  el.innerHTML = items.map(v =>
+    `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
+      <span>${v.brand} ${v.model} ${v.year}</span>
+      <span style="color:var(--gold);font-weight:600">$${Number(v.price).toLocaleString()}</span>
+    </div>`
+  ).join('');
+}
+
+function submitListing() {
+  if (!currentUser) { openAuthModal('login'); return; }
+  const type  = document.getElementById('s-type').value;
+  const brand = document.getElementById('s-brand').value;
+  const model = document.getElementById('s-model').value.trim();
+  const year  = parseInt(document.getElementById('s-year').value);
+  const km    = parseInt(document.getElementById('s-km').value) || 0;
+  const trans = document.getElementById('s-trans').value;
+  const color = document.getElementById('s-color').value.trim();
+  const city  = document.getElementById('s-city').value.trim();
+  const desc  = document.getElementById('s-desc').value.trim();
+  const price = parseInt(document.getElementById('s-price').value);
+
+  if (!type || !brand || !model || !year || !price) {
+    showToast(currentLang==='es'?'Completa los campos requeridos':'Fill in all required fields'); return;
+  }
+
+  const newListing = {
+    id: Date.now(), type, brand, model, year, km, trans, color,
+    city: city||currentUser.city, desc, price,
+    seller: currentUser.name, badge: type,
+    photos: myPhotos.length ? myPhotos : ['https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=500&q=80']
+  };
+
+  listings.unshift(newListing);
+  currentUser.listings.unshift(newListing);
+
+  // Reset form
+  ['s-type','s-brand','s-model','s-year','s-km','s-color','s-city','s-desc','s-price'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('photo-previews').innerHTML = '';
+  document.getElementById('price-suggestion').classList.remove('show');
+  myPhotos = [];
+
+  showToast(currentLang==='es'?'✅ Publicación creada exitosamente':'✅ Listing created successfully');
+  showPage('profile');
+}
+
+// ─── LANGUAGE ─────────────────────────────────
+function toggleLang() {
+  currentLang = currentLang === 'es' ? 'en' : 'es';
+  document.getElementById('langBtn').textContent = currentLang === 'es' ? 'EN' : 'ES';
+  applyLang();
+  renderGrid('featured-grid', listings.slice(0,3));
+  renderGrid('browse-grid', listings);
+  if (currentUser) updateProfilePage();
+  updateResultsCount(listings.length);
+}
+
+function applyLang() {
+  document.documentElement.lang = currentLang;
+  document.querySelectorAll('[data-es][data-en]').forEach(el => {
+    const val = el.getAttribute('data-' + currentLang);
+    if (el.tagName === 'INPUT' || el.tagName === 'OPTION') {
+      el.textContent = val;
+    } else {
+      el.innerHTML = val;
+    }
+  });
+  // Filter options
+  document.querySelectorAll('select option[data-es][data-en]').forEach(opt => {
+    opt.textContent = opt.getAttribute('data-' + currentLang);
+  });
+}
+
+// ─── TOAST ────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.style.display = 'none'; }, 3200);
+}
+
+// ─── CLOSE MODALS ON OVERLAY CLICK ────────────
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+
+// ─── ESC KEY ──────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+});
+</script>
+</body>
+</html>
