@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JDS AutoHub</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Inter:wght@300;400;500;600&family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <style>
 :root{--black:#0a0a0a;--deep:#111;--surface:#1a1a1a;--card:#1f1f1f;--border:#2a2a2a;--gold:#c9a84c;--gold-light:#e8c96b;--gold-dim:#8a6f30;--white:#f5f0e8;--muted:#888;--font-display:'Bebas Neue',sans-serif;--font-serif:'Cormorant Garamond',serif;--font-body:'Inter',sans-serif}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -26,8 +28,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(10,10,10,0.
 .btn-outline-gold:hover{background:var(--gold);color:var(--black)}
 .lang-toggle{background:none;border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:2px;font-size:12px;letter-spacing:1px;cursor:pointer;transition:all .2s;font-family:var(--font-body);font-weight:500}
 .lang-toggle:hover{border-color:var(--gold);color:var(--gold)}
-.btn-google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;background:#fff;color:#333;border:1px solid #ddd;border-radius:2px;font-family:var(--font-body);font-size:13px;font-weight:500;cursor:pointer;margin-top:10px}
-.btn-google:hover{background:#f5f5f5}
+.btn-google{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:13px;background:#fff;color:#3c4043;border:1px solid #dadce0;border-radius:4px;font-family:var(--font-body);font-size:14px;font-weight:500;cursor:pointer;margin-top:10px;transition:all .2s;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+.btn-google:hover{background:#f8f9fa;box-shadow:0 2px 8px rgba(0,0,0,0.15);border-color:#c6c6c6}
+.btn-google img{width:20px;height:20px;flex-shrink:0}
 .page{display:none;min-height:100vh;padding-top:68px}
 .page.active{display:block}
 #page-home .hero{position:relative;height:calc(100vh - 68px);display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--deep)}
@@ -414,7 +417,7 @@ footer{background:var(--deep);border-top:1px solid var(--border);padding:48px 40
         <div class="form-error" id="login-error"></div>
         <button class="btn btn-gold" style="width:100%;padding:14px;margin-top:8px" onclick="doLogin()" id="btn-login">Ingresar a mi cuenta</button>
         <div class="form-divider">o continua con</div>
-        <button class="btn-google" onclick="doGoogleLogin()">&#71; Continuar con Google</button>
+        <button class="btn-google" onclick="doGoogleLogin()"><svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Continuar con Google</button>
         <div class="form-divider">No tienes cuenta?</div>
         <button class="btn btn-ghost" style="width:100%;padding:12px" onclick="switchAuthTab('register')">Crear cuenta gratis</button>
       </div>
@@ -436,7 +439,7 @@ footer{background:var(--deep);border-top:1px solid var(--border);padding:48px 40
         <div class="form-error" id="register-error"></div>
         <button class="btn btn-gold" style="width:100%;padding:14px;margin-top:8px" onclick="doRegister()" id="btn-register">Crear mi cuenta</button>
         <div class="form-divider">o registrate con</div>
-        <button class="btn-google" onclick="doGoogleLogin()">&#71; Continuar con Google</button>
+        <button class="btn-google" onclick="doGoogleLogin()"><svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Continuar con Google</button>
       </div>
     </div>
   </div>
@@ -547,8 +550,36 @@ function doRegister() {
 }
 
 // ── GOOGLE LOGIN ──────────────────────────────
+var firebaseApp;
+try {
+  firebaseApp = firebase.initializeApp({
+    apiKey: "AIzaSyAh_7WDCyXgPrJfSlU0-uuZJurqFY20NVo",
+    authDomain: "jdsautohub.firebaseapp.com",
+    projectId: "jdsautohub",
+    storageBucket: "jdsautohub.firebasestorage.app",
+    messagingSenderId: "342417980597",
+    appId: "1:342417980597:web:742ad142adcf6b733e52fc"
+  });
+} catch(e) { console.log("Firebase:", e.message); }
+
 function doGoogleLogin() {
-  showToast("Login con Google disponible proximamente");
+  if (typeof firebase === "undefined") { showToast("Error: Firebase no disponible"); return; }
+  var provider = new firebase.auth.GoogleAuthProvider();
+  var fbAuth = firebase.auth();
+  fbAuth.signInWithPopup(provider).then(function(result) {
+    var user = result.user;
+    currentUser = {
+      uid: user.uid,
+      email: user.email,
+      name: user.displayName || user.email.split("@")[0],
+      role: "buyer",
+      city: "Colombia"
+    };
+    onLoginSuccess(currentUser.name.split(" ")[0]);
+  }).catch(function(e) {
+    if (e.code === "auth/popup-closed-by-user") return;
+    showToast("Error con Google: " + e.message);
+  });
 }
 
 
