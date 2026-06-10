@@ -484,9 +484,11 @@ var firebaseConfig = {
   messagingSenderId: "342417980597",
   appId: "1:342417980597:web:742ad142adcf6b733e52fc"
 };
-firebase.initializeApp(firebaseConfig);
-var auth = firebase.auth();
-var db = firebase.firestore();
+try {
+  firebase.initializeApp(firebaseConfig);
+} catch(e) { console.log("Firebase init error:", e); }
+var auth = (typeof firebase !== "undefined") ? firebase.auth() : null;
+var db = (typeof firebase !== "undefined") ? firebase.firestore() : null;
 
 var currentLang = "es";
 var currentUser = null;
@@ -496,7 +498,7 @@ var favorites = [];
 var currentDetailId = null;
 var marketPrices = { car:{base:15000,perYear:1200,perKm:-0.05}, truck:{base:28000,perYear:1800,perKm:-0.06}, luxury:{base:45000,perYear:2500,perKm:-0.08}, moto:{base:4000,perYear:400,perKm:-0.02} };
 
-auth.onAuthStateChanged(function(user) {
+if (auth) auth.onAuthStateChanged(function(user) {
   if (user) {
     db.collection("users").doc(user.uid).get().then(function(doc) {
       if (doc.exists) { currentUser = Object.assign({ uid: user.uid, email: user.email }, doc.data()); }
